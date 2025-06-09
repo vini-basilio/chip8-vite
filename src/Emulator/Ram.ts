@@ -8,8 +8,6 @@ export class Ram implements IO {
         for(let i = 0; i < CHIP_8_FONT.length; i++){
             this.memory[i] = CHIP_8_FONT[i];
         }
-
-        console.log(this.memory)
     }
 
     read(address: number): number {

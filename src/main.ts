@@ -6,8 +6,6 @@ import Display from "./Emulator/Display";
 import {Ram} from "./Emulator/Ram";
 import {AddressIO} from "./Utils/AddressaIO";
 import {KeyboardController} from "./Emulator/Keyboard.ts";
-import { IF_KEY_PRESS} from "./ROMs/KeyboardTest.ts";
-
 const canvas = document.querySelector("#canvas") as HTMLCanvasElement
 const romLoader = document.querySelector("#romLoader") as HTMLInputElement
 
