@@ -2,13 +2,12 @@ import type {IO} from "../Utils/Interfaces.ts";
 
 export class KeyboardController implements IO{
     private keysMap: Map<string, number>
-    private keyState: number[]
+    private readonly keyState: number[]
 
     constructor( ) {
-        this.keyState = new Array(16).fill(false);
+        this.keyState = new Array(16).fill(0);
         this.keysMap = new Map();
 
-        // Seu mapeamento de teclas CHIP-8 para QWERTY
         this.keysMap.set("1", 0x1); // CHIP-8 1
         this.keysMap.set("2", 0x2); // CHIP-8 2
         this.keysMap.set("3", 0x3); // CHIP-8 3
@@ -28,7 +27,6 @@ export class KeyboardController implements IO{
 
 
         window.addEventListener("keydown", ev => {
-            console.log(this.keyState)
             ev.preventDefault();
             const keyIndex: undefined | number =  this.keysMap.get(ev.key.toLowerCase())
             if (keyIndex !== undefined) {
@@ -47,6 +45,7 @@ export class KeyboardController implements IO{
     }
 
     read(address: number): number {
+
         return this.keyState[address]
     }
 

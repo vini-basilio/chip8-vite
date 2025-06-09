@@ -23,7 +23,6 @@ if(canvas != null){
     new EmulatorFactory(MM)
     let cpu = EmulatorFactory.create()
 
-
     romLoader.addEventListener('change', function (e: Event) {
         display.stopDisplay();
         cpu.pause();

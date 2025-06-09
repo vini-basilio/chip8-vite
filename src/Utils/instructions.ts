@@ -255,6 +255,22 @@ export const INSTRUCTIONS_SET: instruction[] = [
         arguments: [
             { mask: 0x0F00, shift: 8 },
         ],
+    },
+    {
+        id: "SET_DELAY_REG",
+        mask: 0xF0FF,
+        pattern: 0xF007,
+        arguments: [
+            { mask: 0x0F00, shift: 8 },
+        ],
+    },
+    {
+        id: "SET_REG_DELAY",
+        mask: 0xF0FF,
+        pattern: 0xF015,
+        arguments: [
+            { mask: 0x0F00, shift: 8 },
+        ],
     }
 ]
 

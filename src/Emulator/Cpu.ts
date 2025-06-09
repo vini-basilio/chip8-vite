@@ -3,23 +3,29 @@ import {INSTRUCTIONS_SET} from "../Utils/instructions";
 import { AddressIO} from "../Utils/AddressaIO";
 
 export class Cpu {
-    private registers: Uint8Array
+    private readonly registers: Uint8Array
 
     private regPC: number;
     private regIndex: number;
     private regSP: number;
 
-    private stack: Uint16Array;
+    private readonly stack: Uint16Array;
 
-    private TIMER_INTERVAL: number;
-    private CPU_CYCLES_PER_FRAME: number;
+    private readonly TIMER_INTERVAL: number;
+    private readonly CPU_CYCLES_PER_FRAME: number;
     private lastTimerUpdate: number;
 
     private delayTimer: number;
 
     private running: boolean;
     private memoryMapper: IO
+
+    private getKey: number | null;
+    private readonly CPU_HZ: number;
+
     constructor(memoryMapper: IO) {
+        this.CPU_HZ = 500;
+
         this.memoryMapper = memoryMapper;
         this.running = false;
 
@@ -37,6 +43,8 @@ export class Cpu {
         this.lastTimerUpdate = performance.now()
 
         this.delayTimer = 0;
+
+        this.getKey = null;
     }
     start(){
         this.running = true;
@@ -215,11 +223,21 @@ export class Cpu {
             }
             case "GET_KEY": {
                 const offsetKeyboard = AddressIO.keyboard.start;
-                const keyPressed = this.findFirstPressedKey(offsetKeyboard)
-                if (keyPressed == null) {
-                    this.regPC -= 2; // repete a instrução
+                if(this.getKey == null){
+                    const keyPressed = this.findFirstPressedKey(offsetKeyboard)
+                    if (keyPressed !== null) {
+                        this.getKey = keyPressed
+                    };
+                    this.regPC -= 2;
                 } else {
-                    this.registers[args[0]] = keyPressed + 1;
+                    const current = this.memoryMapper.read(offsetKeyboard + this.getKey)
+                    if(current == 0){
+                        this.registers[args[0]] = this.getKey;
+                        this.getKey = null;
+                        return;
+                    } else {
+                        this.regPC -= 2;
+                    }
                 }
                 break;
             }
@@ -242,9 +260,15 @@ export class Cpu {
                 break;
             }
             case "FX29": return
-            case "FX33": return
-            case "FX07": return
-            case "FX15": return
+            case "SET_DELAY_REG": {
+                this.registers[args[0]] = this.delayTimer;
+                break;
+            }
+            case "SET_REG_DELAY": {
+                this.delayTimer = this.registers[args[0]];
+                break;
+            }
+            case "FX18": return
             case "STORE_MEMO": {
                 for(let i = 0; i <= args[0]; i++){
                      this.memoryMapper.write(this.regIndex + i, this.registers[i]);
@@ -297,19 +321,25 @@ export class Cpu {
         for (let i = 0; i < this.CPU_CYCLES_PER_FRAME; i++) {
             this.tick()
         }
+
         const now = performance.now()
+
         if (now - this.lastTimerUpdate >= this.TIMER_INTERVAL) {
             this.delay()
             this.lastTimerUpdate = now
         }
-        requestAnimationFrame(this.loop);
+        const elapsed = performance.now() - now;
+        const delay = Math.max(0, (1000 / this.CPU_HZ) - elapsed);
+
+
+        setTimeout(this.loop, delay);
     }
 
     private findFirstPressedKey = (offset: number): number | null => {
 
         for ( let i = 0; i < 16; i++) {
             const state = this.memoryMapper.read(offset + i)
-            if ( state == 1) return i + 1;
+            if ( state == 1) return i;
         }
         return null;
     }
