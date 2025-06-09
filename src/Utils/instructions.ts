@@ -9,14 +9,6 @@ export const INSTRUCTIONS_SET: instruction[] = [
         ],
     },
     {
-        id: "SET_INDEX",
-        mask: 0xF000,
-        pattern: 0xA000,
-        arguments: [
-            { mask: 0x0FFF, shift: 0 },
-        ],
-    },
-    {
         id: "SET_REG",
         mask: 0xF000,
         pattern: 0x6000,
@@ -263,23 +255,7 @@ export const INSTRUCTIONS_SET: instruction[] = [
         arguments: [
             { mask: 0x0F00, shift: 8 },
         ],
-    },
-    {
-        id: "IF_KEY_NOT_PRESS",
-        mask: 0xF0FF,
-        pattern: 0xE0A1,
-        arguments: [
-            { mask: 0x0F00, shift: 8 },
-        ],
-    },
-    {
-        id: "IF_KEY_PRESS",
-        mask: 0xF0FF,
-        pattern: 0xE09E,
-        arguments: [
-            { mask: 0x0F00, shift: 8 },
-        ],
-    },
+    }
 ]
 
 export type instruction ={

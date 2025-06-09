@@ -6,6 +6,7 @@ import Display from "./Emulator/Display";
 import {Ram} from "./Emulator/Ram";
 import {AddressIO} from "./Utils/AddressaIO";
 import {KeyboardController} from "./Emulator/Keyboard.ts";
+import { IF_KEY_PRESS} from "./ROMs/KeyboardTest.ts";
 
 const canvas = document.querySelector("#canvas") as HTMLCanvasElement
 const romLoader = document.querySelector("#romLoader") as HTMLInputElement
@@ -15,12 +16,15 @@ if(canvas != null){
     const MM = new MemoryMapper()
     const display = new Display(canvas)
     const ram = new Ram()
-    MM.map(new KeyboardController(), AddressIO.keyboard.start,  AddressIO.keyboard.end)
+    const keyboard = new KeyboardController()
+
+    MM.map(keyboard, AddressIO.keyboard.start,  AddressIO.keyboard.end)
     MM.map(ram, AddressIO.ram.start,  AddressIO.ram.end)
     MM.map(display, AddressIO.display.start,  AddressIO.display.end)
 
     new EmulatorFactory(MM)
     let cpu = EmulatorFactory.create()
+
 
     romLoader.addEventListener('change', function (e: Event) {
         display.stopDisplay();

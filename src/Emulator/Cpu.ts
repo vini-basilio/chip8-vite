@@ -208,35 +208,35 @@ export class Cpu {
              this.registers[args[0]] = random & args[1];
              break;
             }
-            case "JUMP_KEY_PRESS": return
-            case "JUMP_KEY_NOT_PRESS": return
+
             case "ADD_TO_INDEX": {
                 this.regIndex += this.registers[args[0]];
                 break;
             }
             case "GET_KEY": {
                 const offsetKeyboard = AddressIO.keyboard.start;
-                const key = args[0]  - 1;
-                const result = this.memoryMapper.read(offsetKeyboard + key);
-                if(result !== 1){
-                    this.regSP = this.regSP - 2;
+                const keyPressed = this.findFirstPressedKey(offsetKeyboard)
+                if (keyPressed == null) {
+                    this.regPC -= 2; // repete a instrução
+                } else {
+                    this.registers[args[0]] = keyPressed + 1;
                 }
                 break;
             }
-            case "IF_KEY_PRESS": {
+            case "JUMP_KEY_NOT_PRESS": {
                 const offsetKeyboard = AddressIO.keyboard.start;
-                const key = args[0] - 1;
+                const key = this.registers[args[0]];
                 const result = this.memoryMapper.read(offsetKeyboard + key);
-                if(result == 1){
+                if(result !== 1){
                     this.fetch()
                 }
                 break;
             }
-            case "IF_KEY_NOT_PRESS": {
+            case "JUMP_KEY_PRESS": {
                 const offsetKeyboard = AddressIO.keyboard.start;
-                const key = args[0]  - 1;
+                const key = this.registers[args[0]];
                 const result = this.memoryMapper.read(offsetKeyboard + key);
-                if(result !== 1){
+                if(result == 1){
                     this.fetch()
                 }
                 break;
@@ -292,7 +292,6 @@ export class Cpu {
             this.delayTimer--;
         }
     }
-
     private loop = () => {
         if(!this.running) return;
         for (let i = 0; i < this.CPU_CYCLES_PER_FRAME; i++) {
@@ -305,4 +304,14 @@ export class Cpu {
         }
         requestAnimationFrame(this.loop);
     }
+
+    private findFirstPressedKey = (offset: number): number | null => {
+
+        for ( let i = 0; i < 16; i++) {
+            const state = this.memoryMapper.read(offset + i)
+            if ( state == 1) return i + 1;
+        }
+        return null;
+    }
+
 }
