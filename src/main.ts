@@ -9,7 +9,6 @@ import {KeyboardController} from "./Emulator/Keyboard.ts";
 const canvas = document.querySelector("#canvas") as HTMLCanvasElement
 const romLoader = document.querySelector("#romLoader") as HTMLInputElement
 
-
 if(canvas != null){
     const MM = new MemoryMapper()
     const display = new Display(canvas)
@@ -22,6 +21,7 @@ if(canvas != null){
 
     new EmulatorFactory(MM)
     let cpu = EmulatorFactory.create()
+
 
     romLoader.addEventListener('change', function (e: Event) {
         display.stopDisplay();
@@ -47,6 +47,5 @@ if(canvas != null){
 
         reader.readAsArrayBuffer(file);
     });
-
 }
 

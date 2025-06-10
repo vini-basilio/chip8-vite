@@ -11,10 +11,6 @@ export class Cpu {
 
     private readonly stack: Uint16Array;
 
-    private readonly TIMER_INTERVAL: number;
-    private readonly CPU_CYCLES_PER_FRAME: number;
-    private lastTimerUpdate: number;
-
     private delayTimer: number;
 
     private running: boolean;
@@ -22,9 +18,15 @@ export class Cpu {
 
     private getKey: number | null;
     private readonly CPU_HZ: number;
+    private readonly FRAMES_PER_SECOND: number;
+    private timerInterval: number | undefined;
+
 
     constructor(memoryMapper: IO) {
-        this.CPU_HZ = 500;
+        this.FRAMES_PER_SECOND = 1000 / 60 // ~=16 mili
+        this.timerInterval = undefined;
+
+        this.CPU_HZ = 9;
 
         this.memoryMapper = memoryMapper;
         this.running = false;
@@ -32,15 +34,10 @@ export class Cpu {
         this.regPC = 0x200;
         this.regIndex = 0;
 
-
         this.regSP = 0;
         this.stack = new Uint16Array(16);
 
         this.registers = new Uint8Array(16)
-
-        this.TIMER_INTERVAL = 1000 / 60
-        this.CPU_CYCLES_PER_FRAME = 8
-        this.lastTimerUpdate = performance.now()
 
         this.delayTimer = 0;
 
@@ -48,11 +45,18 @@ export class Cpu {
     }
     start(){
         this.running = true;
-        this.loop();
 
+        this.timerInterval = setInterval(() => {
+            if (this.running) {
+                this.delay();
+            }
+        }, this.FRAMES_PER_SECOND);
+
+        this.loop();
     }
     pause(){
         this.running = false;
+        clearInterval(this.timerInterval)
     }
     loadROM(buffer: Uint8Array){
         for (let i = 0; i < buffer.length; i++) {
@@ -98,12 +102,14 @@ export class Cpu {
                 const registerValueX = this.registers[args[0]];
                 const registerValueY = this.registers[args[1]];
                 const rows = args[2]
-                this.registers[this.registers.byteLength - 1] = 0
-
+                this.registers[15] = 0
                 for (let row = 0; row < rows; row++) {
                     const spriteByte = this.memoryMapper.read(this.regIndex + row)
                     for (let col = 0; col < 8; col++) {
                         const spritePixel = (spriteByte >> (7 - col)) & 1;
+
+                        // Só processa se o sprite pixel estiver ligado
+                        if (spritePixel === 0) continue;
 
                         const xOffset = (registerValueX + col) % 64;
                         const yOffset = (registerValueY + row) % 32;
@@ -111,13 +117,12 @@ export class Cpu {
                         const index = yOffset * 64 + xOffset;
 
                         const currentPixel = this.memoryMapper.read(AddressIO.display.start + index);
-                        const newPixel = spritePixel ^ currentPixel;
 
-                       this.memoryMapper.write(AddressIO.display.start + index, newPixel)
-
-                        if (currentPixel === 1 && newPixel === 0) {
-                            this.registers[this.registers.byteLength - 1] = 1
+                        if(currentPixel === 1){
+                            this.registers[15] = 1
                         }
+                        const newPixel =   currentPixel ^ 1;
+                        this.memoryMapper.write(AddressIO.display.start + index, newPixel)
                     }
                 }
                 break;
@@ -157,18 +162,21 @@ export class Cpu {
                 const x = this.registers[args[0]]
                 const y =  this.registers[args[1]];
                 this.registers[args[0]] = x | y;
+                this.registers[15] = 0;
                 break;
             }
             case "BINARY_AND": {
                 const x = this.registers[args[0]]
                 const y =  this.registers[args[1]];
                 this.registers[args[0]] = x & y;
+                this.registers[15] = 0;
                 break;
             }
             case "BINARY_XOR": {
                 const x = this.registers[args[0]]
                 const y =  this.registers[args[1]];
                 this.registers[args[0]] = x ^ y;
+                this.registers[15] = 0;
                 break;
             }
             case "ADD_FLAG": {
@@ -227,7 +235,7 @@ export class Cpu {
                     const keyPressed = this.findFirstPressedKey(offsetKeyboard)
                     if (keyPressed !== null) {
                         this.getKey = keyPressed
-                    };
+                    }
                     this.regPC -= 2;
                 } else {
                     const current = this.memoryMapper.read(offsetKeyboard + this.getKey)
@@ -271,13 +279,13 @@ export class Cpu {
             case "FX18": return
             case "STORE_MEMO": {
                 for(let i = 0; i <= args[0]; i++){
-                     this.memoryMapper.write(this.regIndex + i, this.registers[i]);
+                     this.memoryMapper.write(this.regIndex++, this.registers[i]);
                 }
                 break;
             }
             case "LOAD_FROM_MEMO": {
                 for(let i = 0; i <= args[0]; i++){
-                    this.registers[i] = this.memoryMapper.read(this.regIndex + i);
+                    this.registers[i] = this.memoryMapper.read(this.regIndex++);
                 }
                 break;
             }
@@ -318,23 +326,14 @@ export class Cpu {
     }
     private loop = () => {
         if(!this.running) return;
-        for (let i = 0; i < this.CPU_CYCLES_PER_FRAME; i++) {
+        const startedAt = performance.now();
+        for(let i = 0; i < this.CPU_HZ; i++){
             this.tick()
         }
-
-        const now = performance.now()
-
-        if (now - this.lastTimerUpdate >= this.TIMER_INTERVAL) {
-            this.delay()
-            this.lastTimerUpdate = now
-        }
-        const elapsed = performance.now() - now;
-        const delay = Math.max(0, (1000 / this.CPU_HZ) - elapsed);
-
-
-        setTimeout(this.loop, delay);
+        const doneAt = performance.now();
+        const elipse =  doneAt - startedAt;
+        setTimeout(this.loop,  this.FRAMES_PER_SECOND - elipse);
     }
-
     private findFirstPressedKey = (offset: number): number | null => {
 
         for ( let i = 0; i < 16; i++) {
