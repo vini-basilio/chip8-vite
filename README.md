@@ -8,12 +8,11 @@ Quero criar um core flexível para que outras pessoas possam implementar suas so
 - Como implementar um mapeador de [memória em JavaScript para VMs](https://www.youtube.com/watch?v=hLYGTpvoMgE&list=PLP29wDx6QmW5DdwpdwHCRJsEubS5NrQ9b&index=5)
 
 ## Resultado da suíte de testes Corax+
-![image](https://github.com/user-attachments/assets/4e626084-82a7-43e0-bc37-2fc96482bbb1)
+![image](https://github.com/user-attachments/assets/1fc3e3cd-f9ef-4f6a-81e7-df667b6c8595)
 
-Todas as instruções foram testadas e aprovadas no teste da Corax+, a ROM esta disponível com outras no Github [Timendus](https://github.com/Timendus/chip8-test-suite/tree/main). Abaixo, usei a ROM Quirks para listar minhas configurações:
+Todas as instruções foram testadas e aprovadas no teste da Corax+, a ROM esta disponível com outras no Github [Timendus](https://github.com/Timendus/chip8-test-suite/tree/main). Abaixo, usei a ROM Quirks para listar minhas configurações e o que preciso corrigir:
 
-![image](https://github.com/user-attachments/assets/6b8d3895-fd87-4086-ab54-5ab9e530230b)
-
+![image](https://github.com/user-attachments/assets/aa688178-4552-43fc-85d3-7298494f888b)
 
 ## Problemas conhecidos
 - O teclado não apresenta a velocidade desejada.
