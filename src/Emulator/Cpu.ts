@@ -26,7 +26,7 @@ export class Cpu {
         this.FRAMES_PER_SECOND = 1000 / 60 // ~=16 mili
         this.timerInterval = undefined;
 
-        this.CPU_HZ = 9;
+        this.CPU_HZ = 8;
 
         this.memoryMapper = memoryMapper;
         this.running = false;
@@ -49,10 +49,10 @@ export class Cpu {
         this.timerInterval = setInterval(() => {
             if (this.running) {
                 this.delay();
+                for(let i =0 ; i < this.CPU_HZ; i++)  this.tick();
             }
         }, this.FRAMES_PER_SECOND);
 
-        this.loop();
     }
     pause(){
         this.running = false;
@@ -208,13 +208,13 @@ export class Cpu {
                 break;
             }
             case "SHIFT_LEFT": {
-                const value = this.registers[args[0]];
+                const value = this.registers[args[1]];
                 this.registers[args[0]] = (value << 1) & 0xFF;
                 this.registers[15] = (value & 0x80) >> 7;
                 break;
             }
             case "SHIFT_RIGHT": {
-                const value = this.registers[args[0]];
+                const value = this.registers[args[1]];
                 this.registers[args[0]] = value >> 1;
                 this.registers[15] = value & 0x01;
                 break;
@@ -327,16 +327,6 @@ export class Cpu {
         if (this.delayTimer > 0) {
             this.delayTimer--;
         }
-    }
-    private loop = () => {
-        if(!this.running) return;
-        const startedAt = performance.now();
-        for(let i = 0; i < this.CPU_HZ; i++){
-            this.tick()
-        }
-        const doneAt = performance.now();
-        const elipse =  doneAt - startedAt;
-        setTimeout(this.loop,  this.FRAMES_PER_SECOND - elipse);
     }
     private findFirstPressedKey = (offset: number): number | null => {
 
