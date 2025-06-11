@@ -99,9 +99,11 @@ export class Cpu {
             }
             case "DRAW": {
 
-                const registerValueX = this.registers[args[0]];
-                const registerValueY = this.registers[args[1]];
+                const registerValueX = this.registers[args[0]] % 64;
+                const registerValueY = this.registers[args[1]] % 32;
+
                 const rows = args[2]
+
                 this.registers[15] = 0
                 for (let row = 0; row < rows; row++) {
                     const spriteByte = this.memoryMapper.read(this.regIndex + row)
@@ -111,8 +113,10 @@ export class Cpu {
                         // Só processa se o sprite pixel estiver ligado
                         if (spritePixel === 0) continue;
 
-                        const xOffset = (registerValueX + col) % 64;
-                        const yOffset = (registerValueY + row) % 32;
+                        const xOffset = (registerValueX + col);
+                        const yOffset = (registerValueY + row);
+
+                        if (xOffset >= 64 || yOffset >= 32) continue;
 
                         const index = yOffset * 64 + xOffset;
 
