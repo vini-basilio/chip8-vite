@@ -1,6 +1,6 @@
 # CHIP-8 Core
 A minha primeira versão deste projeto junto com sua história podem ser encontrada aqui: [CHIP-8-TS](https://github.com/vini-basilio/chip-8-TS). Lá também explico os motivos que me levaram a criar este segundo repositório.
-O projeto está com uma versão beta em: https://chip8-vite.vercel.app/
+O projeto está com uma versão beta em: https://chip8-vite.vercel.app/. Você pode se interessar também na minha CLI de [disassembler](https://github.com/vini-basilio/cli-chip-8-disassembler/)
 
 ## Meu objetivo
 Quero criar um core flexível para que outras pessoas possam implementar suas soluções a partir desta. O projeto aplica conceitos que aprendi sobre o como trabalhar com o opcode do CHIP-8 e como criar um roteamento fácil de ser expandido.
